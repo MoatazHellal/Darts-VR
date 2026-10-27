@@ -93,6 +93,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: dcd8bd0004616ec4dad3438735b3784f, type: 3}
       insertIndex: -1
       addedObject: {fileID: 427952651472056606}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: dcd8bd0004616ec4dad3438735b3784f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3166538931689056809}
   m_SourcePrefab: {fileID: 100100000, guid: dcd8bd0004616ec4dad3438735b3784f, type: 3}
 --- !u!4 &561397411623896330 stripped
 Transform:
@@ -125,3 +128,17 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.62005985, y: 0.553216, z: 0.62005985}
   m_Center: {x: 0, y: 0.276608, z: 0}
+--- !u!114 &3166538931689056809
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 901189778439593904}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2693289033a905e408bcf5336087f096, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DartSpawner
+  dartPrefab: {fileID: 8266139938987281317, guid: 412115982c2e45645874bf1d7c384c9c, type: 3}
+  spawnPoint: {fileID: 6761111937868579463}
