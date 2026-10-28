@@ -22,6 +22,11 @@ public class DartSpawner : MonoBehaviour
             return;
 
         availableDart = Instantiate(dartPrefab, spawnPoint.position, spawnPoint.rotation);  
+        availableDart.TryGetComponent(out DartPickupNotifier notifier);
+        if (notifier != null)
+        {
+            notifier.Initialize(this);
+        }
     }
     
     public void OnDartPickedUp(GameObject pickedUpDart)

@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 9208407030518933793}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: GripPoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -42,7 +42,7 @@ GameObject:
   - component: {fileID: 2290318001215598141}
   - component: {fileID: 1588767691052159685}
   - component: {fileID: 5087221783324896554}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Visual
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -130,7 +130,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8384050002674819900}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Tip
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -166,7 +166,7 @@ GameObject:
   - component: {fileID: 26959565728825307}
   - component: {fileID: 6980494524291632818}
   - component: {fileID: 7675834846169145712}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Dart
   m_TagString: Untagged
   m_Icon: {fileID: 0}
