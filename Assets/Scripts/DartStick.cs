@@ -33,6 +33,7 @@ public class DartStick : MonoBehaviour
             return;
 
         bool hit = false;
+        Vector3 impactPosition = Vector3.zero;
 
         for (int i = 0; i < collision.contactCount; i++)
         {
@@ -44,6 +45,7 @@ public class DartStick : MonoBehaviour
             if (isNearTip && isStickAngle)
             {
                 hit = true;
+                impactPosition = contact.point;
                 break;
             }
         }
@@ -61,7 +63,10 @@ public class DartStick : MonoBehaviour
         rigidBody.angularVelocity = Vector3.zero;
         rigidBody.isKinematic = true;
 
+        surface.RegisterHit(impactPosition);
+
         PlayRandomHitSound();
+
     }
 
     private void PlayRandomHitSound()
