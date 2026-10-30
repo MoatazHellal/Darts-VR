@@ -9,9 +9,8 @@ public class DartHandGrabber : MonoBehaviour
     [SerializeField] private XROrigin xrOrigin;
     [SerializeField] private LayerMask dartLayers;
 
-    [Header("Grab / release")] [SerializeField]
-    private float pinchingDistance = 0.02f;
-
+    [Header("Grab / release")] 
+    [SerializeField] private float pinchingDistance = 0.02f;
     [SerializeField] private float releaseDistance = 0.035f;
     [SerializeField] private float grabRadius = 0.02f;
 
@@ -19,8 +18,6 @@ public class DartHandGrabber : MonoBehaviour
     private float velocityWindow = 0.06f; // Longer = smoother, shorter = more responsive
 
     [SerializeField] private float throwForce = 1f;
-    [SerializeField] private bool alignToVelocity = true;
-
 
     [SerializeField] private Vector3 localDartRotationOffset = new Vector3(0f, 180f, 0f);
 
