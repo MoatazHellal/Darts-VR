@@ -14,13 +14,15 @@ public class DartHandGrabber : MonoBehaviour
     [SerializeField] private float releaseDistance = 0.035f;
     [SerializeField] private float grabRadius = 0.02f;
 
-    [Header("Throw")] [SerializeField]
-    private float velocityWindow = 0.06f; // Longer = smoother, shorter = more responsive
-
+    [Header("Throw")] 
+    [SerializeField] private float velocityWindow = 0.06f; // Longer = smoother, shorter = more responsive
     [SerializeField] private float throwForce = 1f;
-
     [SerializeField] private Vector3 localDartRotationOffset = new Vector3(0f, 180f, 0f);
-
+    
+    [Header("Snap")]
+    [SerializeField] private Vector3 gripPositionOffset = Vector3.zero;
+    [SerializeField] private Vector3 gripRotationOffset = Vector3.zero;
+    
     private struct Sample
     {
         public double Time;
@@ -111,9 +113,7 @@ public class DartHandGrabber : MonoBehaviour
 
         if (held != null)
         {
-            held.transform.SetPositionAndRotation(
-                pinch.position + pinch.rotation * holdLocalPosition,
-                pinch.rotation * holdLocalRotation);
+            ApplyHold(pinch);
 
             if (indexThumbDistance > releaseDistance) Release();
         } 
@@ -146,7 +146,6 @@ public class DartHandGrabber : MonoBehaviour
         best.TryGetComponent<DartPickupNotifier>(out var notifier);
         if (notifier != null)
         {
-            Debug.Log("Notified");
             notifier.NotifyPickedUp();
         }
 
@@ -158,10 +157,25 @@ public class DartHandGrabber : MonoBehaviour
         best.isKinematic = true;
         best.interpolation = RigidbodyInterpolation.None;
 
-        // TODO: Should it snap in the hand?
-        var inverse = Quaternion.Inverse(pinch.rotation);
-        holdLocalPosition = inverse * (best.transform.position - pinch.position);
-        holdLocalRotation = inverse * best.transform.rotation;
+        if (best.TryGetComponent<DartGrip>(out var grip) && grip.GrabPoint != null)
+        {
+            var root = best.transform;
+            var invRoot = Quaternion.Inverse(root.rotation);
+
+            var gripRot = invRoot * grip.GrabPoint.rotation;
+            var gripPos = invRoot * (grip.GrabPoint.position - root.position);
+
+            holdLocalRotation = Quaternion.Euler(gripRotationOffset) * Quaternion.Inverse(gripRot);
+            holdLocalPosition = gripPositionOffset - holdLocalRotation * gripPos;
+        }
+        else
+        {
+            var inverse = Quaternion.Inverse(pinch.rotation);
+            holdLocalPosition = inverse * (best.transform.position - pinch.position);
+            holdLocalRotation = inverse * best.transform.rotation;
+        }
+
+        ApplyHold(pinch);
     }
 
     private void Release()
@@ -230,4 +244,11 @@ public class DartHandGrabber : MonoBehaviour
     }
 
     private Pose ToWorld(Pose pose) => trackingSpace != null ? pose.GetTransformedBy(trackingSpace) : pose;
+    
+    private void ApplyHold(Pose pinch)
+    {
+        held.transform.SetPositionAndRotation(
+            pinch.position + pinch.rotation * holdLocalPosition,
+            pinch.rotation * holdLocalRotation);
+    }
 }

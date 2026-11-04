@@ -119,11 +119,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!4 &7993858 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 2697947841297859123, guid: b9c95d1e2f379bc44bbe626b7494b075, type: 3}
-  m_PrefabInstance: {fileID: 49845411}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &49845411
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -184,6 +179,37 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 291488756}
   m_SourcePrefab: {fileID: 100100000, guid: b9c95d1e2f379bc44bbe626b7494b075, type: 3}
+--- !u!1 &136237516
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 136237517}
+  m_Layer: 0
+  m_Name: LeftSpawnPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &136237517
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 136237516}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.496, y: 1.6, z: 1.06}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 723779124}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &242991417
 GameObject:
   m_ObjectHideFlags: 0
@@ -314,14 +340,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f81be636d47e2448aa4311803b5f996, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  boardCenter: {fileID: 7993858}
+  boardCenter: {fileID: 0}
   innerBullRadius: 0.00635
   outerBullRadius: 0.0159
   tripleInnerRadius: 0.099
   tripleOuterRadius: 0.107
   doubleInnerRadius: 0.162
   doubleOuterRadius: 0.17
-  hitDisplay: {fileID: 1730685748}
+  hitDisplay: {fileID: 0}
 --- !u!1 &368404209
 GameObject:
   m_ObjectHideFlags: 0
@@ -735,6 +761,56 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 549629829}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &723779122
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 723779124}
+  - component: {fileID: 723779123}
+  m_Layer: 0
+  m_Name: DartSpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &723779123
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 723779122}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2693289033a905e408bcf5336087f096, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DartSpawner
+  dartPrefab: {fileID: 8266139938987281317, guid: 412115982c2e45645874bf1d7c384c9c, type: 3}
+  rightSpawnPoint: {fileID: 833544150}
+  leftSpawnPoint: {fileID: 136237517}
+  respawnDelay: 0.75
+--- !u!4 &723779124
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 723779122}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 833544150}
+  - {fileID: 136237517}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &771546845
 GameObject:
   m_ObjectHideFlags: 0
@@ -895,6 +971,37 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &833544149
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 833544150}
+  m_Layer: 0
+  m_Name: RightSpawnPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &833544150
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 833544149}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.408, y: 1.6, z: 1.06}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 723779124}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1046454141
 GameObject:
@@ -1929,7 +2036,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DartHandGrabber
   handedness: 2
-  xrOrigin: {fileID: 0}
+  xrOrigin: {fileID: 1433920533}
   dartLayers:
     serializedVersion: 2
     m_Bits: 8
@@ -1937,8 +2044,10 @@ MonoBehaviour:
   releaseDistance: 0.035
   grabRadius: 0.03
   velocityWindow: 0.06
-  throwForce: 1
+  throwForce: 3.2
   localDartRotationOffset: {x: 0, y: 180, z: 0}
+  gripPositionOffset: {x: 0, y: -0.01, z: -0.01}
+  gripRotationOffset: {x: 0, y: 70, z: 0}
 --- !u!1 &1709224634
 GameObject:
   m_ObjectHideFlags: 0
@@ -2315,6 +2424,54 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1796440116
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1796440118}
+  - component: {fileID: 1796440117}
+  m_Layer: 0
+  m_Name: HandednessManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1796440117
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1796440116}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1647aab4d3da0e4883dd78fb9b29340, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HandednessManager
+  handedness: 1
+  dartSpawner: {fileID: 723779123}
+  rightHandGrabber: {fileID: 1668271785}
+  leftHandGrabber: {fileID: 2001203616}
+--- !u!4 &1796440118
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1796440116}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: -0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1811794378
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2366,6 +2523,14 @@ PrefabInstance:
     - target: {fileID: 901189778439593904, guid: b6ee19be59ce73d4f8119d6fc0471aed, type: 3}
       propertyPath: m_Name
       value: Table
+      objectReference: {fileID: 0}
+    - target: {fileID: 901189778439593904, guid: b6ee19be59ce73d4f8119d6fc0471aed, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3166538931689056809, guid: b6ee19be59ce73d4f8119d6fc0471aed, type: 3}
+      propertyPath: m_Enabled
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2583,7 +2748,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DartHandGrabber
   handedness: 1
-  xrOrigin: {fileID: 0}
+  xrOrigin: {fileID: 1433920533}
   dartLayers:
     serializedVersion: 2
     m_Bits: 8
@@ -2591,8 +2756,10 @@ MonoBehaviour:
   releaseDistance: 0.035
   grabRadius: 0.03
   velocityWindow: 0.06
-  throwForce: 1
+  throwForce: 3.2
   localDartRotationOffset: {x: 0, y: 180, z: 0}
+  gripPositionOffset: {x: 0, y: -0.01, z: -0.01}
+  gripRotationOffset: {x: 0, y: -70, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -2609,3 +2776,5 @@ SceneRoots:
   - {fileID: 1433920534}
   - {fileID: 1046454145}
   - {fileID: 1343637951}
+  - {fileID: 723779124}
+  - {fileID: 1796440118}
