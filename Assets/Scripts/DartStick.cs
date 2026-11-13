@@ -63,7 +63,7 @@ public class DartStick : MonoBehaviour
         rigidBody.angularVelocity = Vector3.zero;
         rigidBody.isKinematic = true;
 
-        surface.RegisterHit(impactPosition);
+        surface.RegisterHit(impactPosition, GetComponent<ThrowData>());
 
         PlayRandomHitSound();
 

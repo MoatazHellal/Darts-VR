@@ -22,6 +22,9 @@ public class DartHandGrabber : MonoBehaviour
     [Header("Snap")]
     [SerializeField] private Vector3 gripPositionOffset = Vector3.zero;
     [SerializeField] private Vector3 gripRotationOffset = Vector3.zero;
+
+    [Header("FeedbackUI")]
+    [SerializeField] private FeedbackUI feedbackDashboard;
     
     private struct Sample
     {
@@ -186,6 +189,14 @@ public class DartHandGrabber : MonoBehaviour
         if (dart == null) return;
 
         var velocity = EstimateVelocity() * throwForce;
+
+        if (dart.TryGetComponent<ThrowData>(out var throwData))
+        {
+            throwData.RecordRelease(velocity);
+            if (feedbackDashboard != null)
+                feedbackDashboard.ShowRelease(throwData);
+            
+        }
 
         // Reset the physics (interpolation)
         dart.isKinematic = false;
