@@ -1,6 +1,4 @@
 using UnityEngine;
-using TMPro;
-
 
 public class DartboardSurface : MonoBehaviour
 {
@@ -14,9 +12,9 @@ public class DartboardSurface : MonoBehaviour
     [SerializeField] private float doubleInnerRadius = 0.162f;
     [SerializeField] private float doubleOuterRadius = 0.170f;
 
-    [SerializeField] private TMP_Text hitDisplay;
+    [SerializeField] private FeedbackUI feedbackDashboard;
 
-    public void RegisterHit(Vector3 impactPosition)
+    public void RegisterHit(Vector3 impactPosition, ThrowData throwData)
     {
         if (boardCenter == null)
             return;
@@ -69,9 +67,9 @@ public class DartboardSurface : MonoBehaviour
             zone = $"Single {sectorScore}";
         }
 
-        if (hitDisplay != null)
+        if (feedbackDashboard != null)
         {
-            hitDisplay.text = $"{zone}\n" + $"Score: {score}\n" + $"Distance: {distance * 100f:F1} cm";
+            feedbackDashboard.ShowImpact(throwData, score, zone, distance);
         }
     }
 

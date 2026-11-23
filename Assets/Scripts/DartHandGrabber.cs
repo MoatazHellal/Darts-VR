@@ -18,6 +18,12 @@ public class DartHandGrabber : HandTrackingBehaviour
     [SerializeField] private Vector3 gripPositionOffset = Vector3.zero;
     [SerializeField] private Vector3 gripRotationOffset = Vector3.zero;
 
+    [Header("Feedback")]
+    [SerializeField] private GameObject previousReleasePrefab;
+    private static GameObject previousRelease;
+    [Header("FeedbackUI")]
+    [SerializeField] private FeedbackUI feedbackDashboard;
+
     private static readonly HashSet<Rigidbody> HeldDarts = new HashSet<Rigidbody>(); // Already held darts
 
     private readonly List<DartMath.Sample> samples = new List<DartMath.Sample>(128);
@@ -139,6 +145,24 @@ public class DartHandGrabber : HandTrackingBehaviour
         if (dart == null) return;
 
         var velocity = DartMath.EstimateVelocity(samples, velocityWindow) * throwForce;
+
+        if (dart.TryGetComponent<ThrowData>(out var throwData))
+        {
+            throwData.RecordRelease(velocity, xrOrigin.transform.forward);
+
+            if (previousReleasePrefab != null)
+            {
+                if (previousRelease != null)
+                {
+                    previousRelease.SetActive(false);
+                    Destroy(previousRelease);
+                }
+
+                previousRelease = Instantiate(previousReleasePrefab, throwData.ReleasePosition, throwData.ReleaseRotation);
+            }
+            if (feedbackDashboard != null)
+                feedbackDashboard.ShowRelease(throwData);
+        }
 
         // Reset the physics (interpolation)
         dart.isKinematic = false;
