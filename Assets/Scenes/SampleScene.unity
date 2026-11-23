@@ -2921,7 +2921,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a1647aab4d3da0e4883dd78fb9b29340, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HandednessManager
-  handedness: 1
+  handedness: 2
   dartSpawner: {fileID: 723779123}
   rightHandGrabber: {fileID: 1668271785}
   leftHandGrabber: {fileID: 2001203616}
