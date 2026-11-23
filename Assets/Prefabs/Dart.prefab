@@ -167,6 +167,7 @@ GameObject:
   - component: {fileID: 6980494524291632818}
   - component: {fileID: 7675834846169145712}
   - component: {fileID: 8857787756750593029}
+  - component: {fileID: 7354838227644206804}
   m_Layer: 3
   m_Name: Dart
   m_TagString: Untagged
@@ -385,3 +386,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DartGrip
   grabPoint: {fileID: 9208407030518933793}
+--- !u!114 &7354838227644206804
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8266139938987281317}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f36c1e9da23415945a6753ff6d8c00d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DartFlightAlign
+  localFlightAxis: {x: 0, y: 0, z: -1}
+  minSpeed: 1
