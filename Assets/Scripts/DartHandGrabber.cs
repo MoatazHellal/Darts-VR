@@ -24,12 +24,8 @@ public class DartHandGrabber : MonoBehaviour
     [SerializeField] private Vector3 gripRotationOffset = Vector3.zero;
 
     [Header("Feedback")]
-    [SerializeField] private GameObject previousReleasePrefab;
-    private static GameObject previousRelease;
-    [Header("FeedbackUI")]
-    [SerializeField] private FeedbackUI feedbackDashboard;
-
-
+    [SerializeField] private FeedbackModule feedbackModule;
+    
     
     private struct Sample
     {
@@ -199,19 +195,8 @@ public class DartHandGrabber : MonoBehaviour
         {
             throwData.RecordRelease(velocity, xrOrigin.transform.forward);
 
-            if (previousReleasePrefab != null)
-            {
-                if (previousRelease != null)
-                {
-                    previousRelease.SetActive(false);
-                    Destroy(previousRelease);
-                }
-
-                previousRelease = Instantiate(previousReleasePrefab, throwData.ReleasePosition, throwData.ReleaseRotation);
-            }
-            if (feedbackDashboard != null)
-                feedbackDashboard.ShowRelease(throwData);
-            
+            if (feedbackModule != null)
+                feedbackModule.OnReleased(throwData);
         }
 
         // Reset the physics (interpolation)

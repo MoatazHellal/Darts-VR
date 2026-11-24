@@ -21,15 +21,22 @@ public class FeedbackUI : MonoBehaviour
 
     public void Awake()
     {
+        ClearDisplay();
+    }
+
+    public void ClearDisplay()
+    {
+        currentThrow = null;
+
         velocityText.text = "";
         verticalTiltText.text = "";
         horizontalTiltText.text = "";
         resultText.text = "";
         distanceText.text = "";
+
         SetReleaseIconsVisible(false);
         SetImpactIconsVisible(false);
     }
-
     public void ShowRelease(ThrowData data)
     {
         currentThrow = data;

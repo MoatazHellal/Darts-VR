@@ -12,7 +12,7 @@ public class DartboardSurface : MonoBehaviour
     [SerializeField] private float doubleInnerRadius = 0.162f;
     [SerializeField] private float doubleOuterRadius = 0.170f;
 
-    [SerializeField] private FeedbackUI feedbackDashboard;
+    [SerializeField] private FeedbackModule feedbackModule;
 
     public void RegisterHit(Vector3 impactPosition, ThrowData throwData)
     {
@@ -67,9 +67,9 @@ public class DartboardSurface : MonoBehaviour
             zone = $"Single {sectorScore}";
         }
 
-        if (feedbackDashboard != null)
+        if (feedbackModule != null)
         {
-            feedbackDashboard.ShowImpact(throwData, score, zone, distance);
+            feedbackModule.OnImpact(throwData, score, zone, distance);
         }
     }
 
