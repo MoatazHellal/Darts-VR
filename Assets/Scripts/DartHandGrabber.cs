@@ -3,16 +3,11 @@ using Unity.XR.CoreUtils;
 using UnityEngine;
 using UnityEngine.XR.Hands;
 
-public class DartHandGrabber : MonoBehaviour
+public class DartHandGrabber : HandTrackingBehaviour
 {
     [SerializeField] private Handedness handedness = Handedness.Right;
     [SerializeField] private XROrigin xrOrigin;
     [SerializeField] private LayerMask dartLayers;
-
-    [Header("Grab / release")] 
-    [SerializeField] private float pinchingDistance = 0.02f;
-    [SerializeField] private float releaseDistance = 0.035f;
-    [SerializeField] private float grabRadius = 0.02f;
 
     [Header("Throw")] 
     [SerializeField] private float velocityWindow = 0.06f; // Longer = smoother, shorter = more responsive
@@ -25,18 +20,10 @@ public class DartHandGrabber : MonoBehaviour
 
     [Header("Feedback")]
     [SerializeField] private FeedbackModule feedbackModule;
-    
-    
-    private struct Sample
-    {
-        public double Time;
-        public Vector3 Position;
-    }
 
     private static readonly HashSet<Rigidbody> HeldDarts = new HashSet<Rigidbody>(); // Already held darts
-    private static readonly List<XRHandSubsystem> Subsystems = new List<XRHandSubsystem>();
 
-    private readonly List<Sample> samples = new List<Sample>(128);
+    private readonly List<DartMath.Sample> samples = new List<DartMath.Sample>(128);
     private XRHandSubsystem subsystem;
     private bool isTracked;
     private Vector3 lastThumbLocal;
@@ -44,8 +31,7 @@ public class DartHandGrabber : MonoBehaviour
     private readonly Collider[] overlaps = new Collider[16];
     private Rigidbody held;
     private RigidbodyInterpolation heldInterpolation;
-    private Vector3 holdLocalPosition; // dart pose relative to the pinch, captured at grab
-    private Quaternion holdLocalRotation;
+    private Pose holdLocal;
 
     private Transform trackingSpace;
 
@@ -53,37 +39,14 @@ public class DartHandGrabber : MonoBehaviour
     {
         trackingSpace = xrOrigin.CameraFloorOffsetObject.transform;
     }
-
-    private void Update()
+    
+    protected override void OnDisable()
     {
-        if (subsystem == null || !subsystem.running)
-        {
-            Unbind();
-            SubsystemManager.GetSubsystems(Subsystems);
-            foreach (var handSubsystem in Subsystems)
-            {
-                if (!handSubsystem.running) continue;
-                subsystem = handSubsystem;
-                subsystem.updatedHands += OnUpdatedHands;
-                break;
-            }
-        }
-    }
-
-    private void OnDisable()
-    {
-        Unbind();
+        base.OnDisable();
         if (held != null) Release();
-        isTracked = false;
     }
 
-    private void Unbind()
-    {
-        if (subsystem != null) subsystem.updatedHands -= OnUpdatedHands;
-        subsystem = null;
-    }
-
-    private void OnUpdatedHands(
+    protected override void OnUpdatedHands(
         XRHandSubsystem handSubsystem,
         XRHandSubsystem.UpdateSuccessFlags flags,
         XRHandSubsystem.UpdateType updateType)
@@ -110,18 +73,18 @@ public class DartHandGrabber : MonoBehaviour
         index = ToWorld(index);
         distal = ToWorld(distal);
 
-        var pinch = new Pose((thumb.position + index.position) / 2f, distal.rotation);
-        var indexThumbDistance = Vector3.Distance(thumb.position, index.position);
-
+        var pinch = HandShapes.Pinch(thumb, index, distal);
+        var indexThumbDistance = HandShapes.PinchDistance(thumb, index);
+        
         if (isNewPose) AddSample(pinch.position);
-
+        
         if (held != null)
         {
             ApplyHold(pinch);
 
-            if (indexThumbDistance > releaseDistance) Release();
+            if (indexThumbDistance > HandsSettings.ReleaseDistance) Release();
         } 
-        else if (indexThumbDistance < pinchingDistance)
+        else if (indexThumbDistance < HandsSettings.PinchingDistance)
         {
             TryGrab(pinch);
         }
@@ -129,8 +92,9 @@ public class DartHandGrabber : MonoBehaviour
 
     private void TryGrab(Pose pinch)
     {
-        var count = Physics.OverlapSphereNonAlloc(pinch.position, grabRadius, overlaps, dartLayers,
+        var count = Physics.OverlapSphereNonAlloc(pinch.position, HandsSettings.GrabRadius, overlaps, dartLayers,
             QueryTriggerInteraction.Collide);
+        
         Rigidbody best = null;
         var bestDistance = float.MaxValue;
         for (var i = 0; i < count; i++)
@@ -147,11 +111,7 @@ public class DartHandGrabber : MonoBehaviour
 
         if (best == null) return;
         
-        best.TryGetComponent<DartPickupNotifier>(out var notifier);
-        if (notifier != null)
-        {
-            notifier.NotifyPickedUp();
-        }
+        if (best.TryGetComponent<DartPickupNotifier>(out var notifier)) notifier.NotifyPickedUp();
 
         held = best;
         HeldDarts.Add(best);
@@ -163,20 +123,12 @@ public class DartHandGrabber : MonoBehaviour
 
         if (best.TryGetComponent<DartGrip>(out var grip) && grip.GrabPoint != null)
         {
-            var root = best.transform;
-            var invRoot = Quaternion.Inverse(root.rotation);
-
-            var gripRot = invRoot * grip.GrabPoint.rotation;
-            var gripPos = invRoot * (grip.GrabPoint.position - root.position);
-
-            holdLocalRotation = Quaternion.Euler(gripRotationOffset) * Quaternion.Inverse(gripRot);
-            holdLocalPosition = gripPositionOffset - holdLocalRotation * gripPos;
+            DartMath.ComputeGripHold(best.transform, grip.GrabPoint, gripPositionOffset, gripRotationOffset,
+                out holdLocal.position, out holdLocal.rotation);
         }
         else
         {
-            var inverse = Quaternion.Inverse(pinch.rotation);
-            holdLocalPosition = inverse * (best.transform.position - pinch.position);
-            holdLocalRotation = inverse * best.transform.rotation;
+            holdLocal = DartMath.ToLocal(pinch, new Pose(best.transform.position, best.transform.rotation));
         }
 
         ApplyHold(pinch);
@@ -189,7 +141,7 @@ public class DartHandGrabber : MonoBehaviour
         HeldDarts.Remove(dart);
         if (dart == null) return;
 
-        var velocity = EstimateVelocity() * throwForce;
+        var velocity = DartMath.EstimateVelocity(samples, velocityWindow) * throwForce;
 
         if (dart.TryGetComponent<ThrowData>(out var throwData))
         {
@@ -204,7 +156,7 @@ public class DartHandGrabber : MonoBehaviour
         dart.interpolation = heldInterpolation;
 
         if (velocity.sqrMagnitude > 0.25f) // only align dart for throws with enough velocity
-            dart.transform.rotation = Quaternion.LookRotation(velocity) * Quaternion.Euler(localDartRotationOffset);
+            dart.transform.rotation = DartMath.DartRotation(velocity, 0f, localDartRotationOffset);
 
         dart.linearVelocity = velocity;
         dart.angularVelocity = Vector3.zero;
@@ -213,54 +165,19 @@ public class DartHandGrabber : MonoBehaviour
     private void AddSample(Vector3 position)
     {
         var now = Time.realtimeSinceStartupAsDouble;
-        samples.Add(new Sample { Time = now, Position = position });
+        samples.Add(new DartMath.Sample { Time = now, Position = position });
 
         // Remove old elements (older than 1s)
         var old = 0;
         while (old < samples.Count && samples[old].Time < now - 1) old++;
         if (old > 0) samples.RemoveRange(0, old);
     }
-    
-    private Vector3 EstimateVelocity()
-    {
-        if (samples.Count < 2) return Vector3.zero;
-
-        var end = samples[^1].Time;
-        var first = samples.Count - 1;
-        while (first > 0 && samples[first - 1].Time >= end - velocityWindow) first--;
-        var n = samples.Count - first;
-        if (n < 2) first = samples.Count - 2; // use last 2 if not enough sample in the window (can happen if there's a loss of hand tracking)
-        n = samples.Count - first;
-
-        double meanT = 0;
-        var meanP = Vector3.zero;
-        for (var i = first; i < samples.Count; i++)
-        {
-            meanT += samples[i].Time - end;
-            meanP += samples[i].Position;
-        }
-
-        meanT /= n;
-        meanP /= n;
-
-        var numerator = Vector3.zero;
-        double denominator = 0;
-        for (var i = first; i < samples.Count; i++)
-        {
-            var dt = (samples[i].Time - end) - meanT;
-            numerator += (float)dt * (samples[i].Position - meanP);
-            denominator += dt * dt;
-        }
-
-        return denominator > 1e-9 ? numerator / (float)denominator : Vector3.zero;
-    }
 
     private Pose ToWorld(Pose pose) => trackingSpace != null ? pose.GetTransformedBy(trackingSpace) : pose;
     
     private void ApplyHold(Pose pinch)
     {
-        held.transform.SetPositionAndRotation(
-            pinch.position + pinch.rotation * holdLocalPosition,
-            pinch.rotation * holdLocalRotation);
+        var pose = DartMath.Compose(pinch, holdLocal);
+        held.transform.SetPositionAndRotation(pose.position, pose.rotation);
     }
 }
