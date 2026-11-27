@@ -12,20 +12,36 @@ public class HandednessManager : MonoBehaviour
 
     private void Awake()
     {
+        // Retrieve the selected dominant hand
+        handedness = SessionSettings.DominantHand == "Left"
+            ? Handedness.Left
+            : Handedness.Right;
+
+        Debug.Log("Applied dominant hand: " + handedness);
+
         dartSpawner.handedness = handedness;
+
         if (handedness == Handedness.Right)
         {
             rightHandGrabber.gameObject.SetActive(true);
             leftHandGrabber.gameObject.SetActive(false);
-            rightDemo.gameObject.SetActive(true);
-            leftDemo.gameObject.SetActive(false);
+
+            if (rightDemo != null)
+                rightDemo.gameObject.SetActive(true);
+
+            if (leftDemo != null)
+                leftDemo.gameObject.SetActive(false);
         }
         else
         {
             rightHandGrabber.gameObject.SetActive(false);
             leftHandGrabber.gameObject.SetActive(true);
-            rightDemo.gameObject.SetActive(false);
-            leftDemo.gameObject.SetActive(true);
+
+            if (rightDemo != null)
+                rightDemo.gameObject.SetActive(false);
+
+            if (leftDemo != null)
+                leftDemo.gameObject.SetActive(true);
         }
     }
 }

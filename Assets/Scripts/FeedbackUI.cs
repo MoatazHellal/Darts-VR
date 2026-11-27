@@ -19,6 +19,9 @@ public class FeedbackUI : MonoBehaviour
 
     private ThrowData currentThrow;
 
+    // Retrieve the selected language
+    private bool IsFrench => SessionSettings.Language == "FR";
+
     public void Awake()
     {
         ClearDisplay();
@@ -37,15 +40,37 @@ public class FeedbackUI : MonoBehaviour
         SetReleaseIconsVisible(false);
         SetImpactIconsVisible(false);
     }
+
     public void ShowRelease(ThrowData data)
     {
         currentThrow = data;
 
-        velocityText.text = $"Velocity: {data.ReleaseSpeed:F1} m/s";
+        if (IsFrench)
+        {
+            velocityText.text =
+                $"Vitesse : {data.ReleaseSpeed:F1} m/s";
 
-        verticalTiltText.text = $"Vertical Tilt: {Mathf.Abs(data.VerticalTilt):F0}° " + (data.VerticalTilt >= 0f ? "UP" : "DOWN");
+            verticalTiltText.text =
+                $"Inclinaison verticale : {Mathf.Abs(data.VerticalTilt):F0}° "
+                + (data.VerticalTilt >= 0f ? "HAUT" : "BAS");
 
-        horizontalTiltText.text = $"Horizontal Tilt: {Mathf.Abs(data.HorizontalTilt):F0}° " + (data.HorizontalTilt >= 0f ? "RIGHT" : "LEFT");
+            horizontalTiltText.text =
+                $"Inclinaison horizontale : {Mathf.Abs(data.HorizontalTilt):F0}° "
+                + (data.HorizontalTilt >= 0f ? "DROITE" : "GAUCHE");
+        }
+        else
+        {
+            velocityText.text =
+                $"Velocity: {data.ReleaseSpeed:F1} m/s";
+
+            verticalTiltText.text =
+                $"Vertical Tilt: {Mathf.Abs(data.VerticalTilt):F0}° "
+                + (data.VerticalTilt >= 0f ? "UP" : "DOWN");
+
+            horizontalTiltText.text =
+                $"Horizontal Tilt: {Mathf.Abs(data.HorizontalTilt):F0}° "
+                + (data.HorizontalTilt >= 0f ? "RIGHT" : "LEFT");
+        }
 
         resultText.text = "";
         distanceText.text = "";
@@ -59,8 +84,6 @@ public class FeedbackUI : MonoBehaviour
         if (data == null || data != currentThrow)
             return;
 
-        
-
         bool scored = score > 0;
 
         SetImpactIconsVisible(scored);
@@ -72,8 +95,16 @@ public class FeedbackUI : MonoBehaviour
             return;
         }
 
-        resultText.text = $"Zone/Score: {zone} · {score}";
-        distanceText.text = $"Distance: {distance * 100f:F1} cm";
+        if (IsFrench)
+        {
+            resultText.text = $"Zone/Score : {zone} · {score}";
+            distanceText.text = $"Distance : {distance * 100f:F1} cm";
+        }
+        else
+        {
+            resultText.text = $"Zone/Score: {zone} · {score}";
+            distanceText.text = $"Distance: {distance * 100f:F1} cm";
+        }
     }
 
     private void SetReleaseIconsVisible(bool visible)

@@ -1,10 +1,16 @@
+
 using UnityEngine;
 
 public class DartboardSurface : MonoBehaviour
 {
-
     [SerializeField] private Transform boardCenter;
-    private int[] sectorScores = {20, 1, 18, 4, 13, 6, 10, 15, 2, 17, 3, 19, 7, 16, 8, 11, 14, 9, 12, 5 };
+
+    private int[] sectorScores =
+    {
+        20, 1, 18, 4, 13, 6, 10, 15, 2, 17,
+        3, 19, 7, 16, 8, 11, 14, 9, 12, 5
+    };
+
     [SerializeField] private float innerBullRadius = 0.00635f;
     [SerializeField] private float outerBullRadius = 0.0159f;
     [SerializeField] private float tripleInnerRadius = 0.099f;
@@ -14,23 +20,37 @@ public class DartboardSurface : MonoBehaviour
 
     [SerializeField] private FeedbackModule feedbackModule;
 
-    public void RegisterHit(Vector3 impactPosition, ThrowData throwData)
+    public void RegisterHit(
+        Vector3 impactPosition,
+        ThrowData throwData)
     {
         if (boardCenter == null)
             return;
 
-        Vector3 offset = impactPosition - boardCenter.position;
+        Vector3 offset =
+            impactPosition - boardCenter.position;
 
-        float x = -Vector3.Dot(offset, boardCenter.right);
-        float y = Vector3.Dot(offset, boardCenter.up);
+        float x = -Vector3.Dot(
+            offset,
+            boardCenter.right
+        );
 
-        float distance = new Vector2(x, y).magnitude;
+        float y = Vector3.Dot(
+            offset,
+            boardCenter.up
+        );
 
-        float angle = Mathf.Atan2(x, y) * Mathf.Rad2Deg;
+        float distance =
+            new Vector2(x, y).magnitude;
+
+        float angle =
+            Mathf.Atan2(x, y) * Mathf.Rad2Deg;
 
         angle = Mathf.Repeat(angle + 9f, 360f);
 
-        int sectorIndex = Mathf.FloorToInt(angle / 18f);
+        int sectorIndex =
+            Mathf.FloorToInt(angle / 18f);
+
         int sectorScore = sectorScores[sectorIndex];
 
         int score;
@@ -56,7 +76,8 @@ public class DartboardSurface : MonoBehaviour
             score = sectorScore * 2;
             zone = $"Double {sectorScore}";
         }
-        else if (distance >= tripleInnerRadius && distance <= tripleOuterRadius)
+        else if (distance >= tripleInnerRadius &&
+                 distance <= tripleOuterRadius)
         {
             score = sectorScore * 3;
             zone = $"Triple {sectorScore}";
@@ -67,10 +88,34 @@ public class DartboardSurface : MonoBehaviour
             zone = $"Single {sectorScore}";
         }
 
+        // ==========================================
+        // ORIGINAL FEEDBACK MECHANISM
+        // ==========================================
+
         if (feedbackModule != null)
         {
-            feedbackModule.OnImpact(throwData, score, zone, distance);
+            feedbackModule.OnImpact(
+                throwData,
+                score,
+                zone,
+                distance
+            );
+        }
+
+        // ==========================================
+        // EXPERIMENT INTEGRATION
+        // Record impact independently of feedback
+        // ==========================================
+
+        if (TrialRecorder.Instance != null)
+        {
+            TrialRecorder.Instance.OnDartImpact(
+                throwData,
+                impactPosition,
+                score,
+                zone,
+                distance
+            );
         }
     }
-
 }

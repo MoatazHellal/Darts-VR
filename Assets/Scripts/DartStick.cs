@@ -1,3 +1,4 @@
+
 using UnityEngine;
 
 public class DartStick : MonoBehaviour
@@ -24,10 +25,33 @@ public class DartStick : MonoBehaviour
         if (isStuck)
             return;
 
-        DartboardSurface surface = collision.collider.GetComponentInParent<DartboardSurface>();
+        ThrowData throwData = GetComponent<ThrowData>();
+
+        DartboardSurface surface =
+            collision.collider
+                .GetComponentInParent<DartboardSurface>();
+
+        // ==========================================
+        // EXPERIMENT INTEGRATION
+        // Collision with a non-target surface
+        // ==========================================
 
         if (surface == null)
+        {
+            if (throwData != null &&
+                throwData.HasBeenReleased &&
+                TrialRecorder.Instance != null)
+            {
+                TrialRecorder.Instance.OnDartMiss(
+                    throwData,
+                    "NonTargetCollision"
+                );
+            }
+
             return;
+        }
+
+        // Original collision validation
 
         if (tip == null)
             return;
@@ -37,10 +61,20 @@ public class DartStick : MonoBehaviour
 
         for (int i = 0; i < collision.contactCount; i++)
         {
-            ContactPoint contact = collision.GetContact(i);
+            ContactPoint contact =
+                collision.GetContact(i);
 
-            bool isNearTip = Vector3.Distance(tip.position, contact.point) <= tipContactDistance;
-            bool isStickAngle = Vector3.Angle(-transform.forward, -contact.normal) <= maxStickAngle;
+            bool isNearTip =
+                Vector3.Distance(
+                    tip.position,
+                    contact.point
+                ) <= tipContactDistance;
+
+            bool isStickAngle =
+                Vector3.Angle(
+                    -transform.forward,
+                    -contact.normal
+                ) <= maxStickAngle;
 
             if (isNearTip && isStickAngle)
             {
@@ -53,9 +87,25 @@ public class DartStick : MonoBehaviour
         if (!hit)
         {
             PlayDeflectSound();
+
+            // ======================================
+            // EXPERIMENT INTEGRATION
+            // Rejected dartboard impact
+            // ======================================
+
+            if (throwData != null &&
+                throwData.HasBeenReleased &&
+                TrialRecorder.Instance != null)
+            {
+                TrialRecorder.Instance.OnDartDeflected(
+                    throwData
+                );
+            }
+
             return;
         }
-            
+
+        // Original sticking mechanism
 
         isStuck = true;
 
@@ -63,18 +113,25 @@ public class DartStick : MonoBehaviour
         rigidBody.angularVelocity = Vector3.zero;
         rigidBody.isKinematic = true;
 
-        surface.RegisterHit(impactPosition, GetComponent<ThrowData>());
+        surface.RegisterHit(
+            impactPosition,
+            throwData
+        );
 
         PlayRandomHitSound();
-
     }
 
     private void PlayRandomHitSound()
     {
-        if (audioSource == null || hitSounds == null || hitSounds.Length == 0)
+        if (audioSource == null ||
+            hitSounds == null ||
+            hitSounds.Length == 0)
+        {
             return;
+        }
 
         int index = Random.Range(0, hitSounds.Length);
+
         AudioClip clip = hitSounds[index];
 
         if (clip != null)
@@ -83,8 +140,11 @@ public class DartStick : MonoBehaviour
 
     private void PlayDeflectSound()
     {
-        if (audioSource == null || deflectSound == null)
+        if (audioSource == null ||
+            deflectSound == null)
+        {
             return;
+        }
 
         audioSource.PlayOneShot(deflectSound);
     }
