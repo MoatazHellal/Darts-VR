@@ -10,6 +10,28 @@ public class HandednessManager : MonoBehaviour
     [SerializeField] private DartThrowDemo rightDemo;
     [SerializeField] private DartThrowDemo leftDemo;
 
+    public DartThrowDemo Demo
+    {
+        get
+        {
+            if (handedness == Handedness.Right)
+                return rightDemo;
+            else 
+                return leftDemo;
+        }
+    }
+    
+    public DartHandGrabber Grabber
+    {
+        get
+        {
+            if (handedness == Handedness.Right)
+                return rightHandGrabber;
+            else 
+                return leftHandGrabber;
+        }
+    }
+
     private void Awake()
     {
         dartSpawner.handedness = handedness;

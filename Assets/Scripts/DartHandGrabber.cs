@@ -20,6 +20,8 @@ public class DartHandGrabber : HandTrackingBehaviour
 
     [Header("Feedback")]
     [SerializeField] private FeedbackModule feedbackModule;
+    
+    public Transform HeldDart => held != null ? held.transform : null;
 
     private static readonly HashSet<Rigidbody> HeldDarts = new HashSet<Rigidbody>(); // Already held darts
 
@@ -94,23 +96,28 @@ public class DartHandGrabber : HandTrackingBehaviour
     {
         var count = Physics.OverlapSphereNonAlloc(pinch.position, HandsSettings.GrabRadius, overlaps, dartLayers,
             QueryTriggerInteraction.Collide);
-        
+
         Rigidbody best = null;
+        DartGrip bestGrip = null;
         var bestDistance = float.MaxValue;
         for (var i = 0; i < count; i++)
         {
             var body = overlaps[i].attachedRigidbody;
             if (body == null || HeldDarts.Contains(body)) continue;
+
+            if (!body.TryGetComponent<DartGrip>(out var grip) || !grip.CanGrab || grip.GrabPoint == null) continue;
+
             var distance = (body.position - pinch.position).sqrMagnitude;
             if (distance < bestDistance)
             {
                 best = body;
+                bestGrip = grip;
                 bestDistance = distance;
             }
         }
 
         if (best == null) return;
-        
+
         if (best.TryGetComponent<DartPickupNotifier>(out var notifier)) notifier.NotifyPickedUp();
 
         held = best;
@@ -121,15 +128,8 @@ public class DartHandGrabber : HandTrackingBehaviour
         best.isKinematic = true;
         best.interpolation = RigidbodyInterpolation.None;
 
-        if (best.TryGetComponent<DartGrip>(out var grip) && grip.GrabPoint != null)
-        {
-            DartMath.ComputeGripHold(best.transform, grip.GrabPoint, gripPositionOffset, gripRotationOffset,
-                out holdLocal.position, out holdLocal.rotation);
-        }
-        else
-        {
-            holdLocal = DartMath.ToLocal(pinch, new Pose(best.transform.position, best.transform.rotation));
-        }
+        DartMath.ComputeGripHold(best.transform, bestGrip.GrabPoint, gripPositionOffset, gripRotationOffset,
+            out holdLocal.position, out holdLocal.rotation);
 
         ApplyHold(pinch);
     }

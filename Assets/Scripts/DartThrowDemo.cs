@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.XR.Hands;
@@ -38,6 +39,14 @@ public class DartThrowDemo : MonoBehaviour
     [SerializeField] private float aimDuration = 0.6f;
     [SerializeField] private float backswingDuration = 0.35f;
     [SerializeField] private float fingerOpenDuration = 0.06f;
+    
+    [Header("Alignment")]
+    [SerializeField] private DartHandGrabber dartGrabber;
+    [SerializeField] private float positionTolerance = 0.04f;
+    [SerializeField] private float angleTolerance = 20f;
+    [SerializeField] private float alignHoldDuration = 1f;
+
+    private float alignProgress = 0f;
 
     // Only used for estimating the grabber movement speed
     private readonly System.Collections.Generic.List<DartMath.Sample> swingSamples =
@@ -57,6 +66,12 @@ public class DartThrowDemo : MonoBehaviour
     private float omega;
     private float forwardDuration;
     private float followDuration;
+    
+    private Coroutine currentRoutine;
+    private Rigidbody currentDart;
+
+    private bool wasHoldingDart;
+    public bool Enabled { get; set; }
 
     private void Awake()
     {
@@ -73,12 +88,53 @@ public class DartThrowDemo : MonoBehaviour
         releaseShape = new Pose[count];
     }
 
+    private void Update()
+    {
+        if (!Enabled) return;
+        
+        if (dartGrabber.HeldDart != null)
+        {
+            if (!wasHoldingDart)
+            {
+                Play();
+            }
+            wasHoldingDart = true;
+        }
+        else
+        {
+            wasHoldingDart = false;
+        }
+    }
+
     [ContextMenu("Play")]
     public void Play()
     {
-        StopAllCoroutines();
-        StartCoroutine(PlayRoutine());
+        StopDemo();
+        currentRoutine = StartCoroutine(PlayRoutine());
     }
+    
+    /// <summary>
+    /// Stops the current demo and removes what it left in the scene
+    /// </summary>
+    public void StopDemo()
+    {
+        if (currentRoutine != null)
+        {
+            StopCoroutine(currentRoutine);
+            currentRoutine = null;
+        }
+
+        if (currentDart != null)
+        {
+            Destroy(currentDart.gameObject);
+            currentDart = null;
+        }
+
+        if (ghostHand != null) ghostHand.gameObject.SetActive(false);
+        alignProgress = 0f;
+    }
+    
+    private void OnDisable() => StopDemo();
 
     /// <summary>
     /// The routine that generate the swing and plays the movement
@@ -90,6 +146,7 @@ public class DartThrowDemo : MonoBehaviour
 
         var release = ReleasePosition();
         var dart = Instantiate(dartPrefab);
+        currentDart = dart;
         var interpolation = dart.interpolation;
         dart.isKinematic = true;
         dart.interpolation = RigidbodyInterpolation.None;
@@ -106,7 +163,13 @@ public class DartThrowDemo : MonoBehaviour
         var endTime = releaseTime + followDuration + 0.3f;
 
         ghostHand.gameObject.SetActive(true);
+        
+        Hold(dart, PoseGhost(GhostAngle(0f, -releaseTime), 0f), grip);
+        if (dartGrabber != null)
+            yield return WaitForAlignment(dart.transform);
+        
         var released = false;
+        
         for (var time = 0f; time <= endTime; time += Time.deltaTime)
         {
             var relativeTime = time - releaseTime;
@@ -118,6 +181,9 @@ public class DartThrowDemo : MonoBehaviour
                 dart.linearVelocity = velocity;
                 dart.angularVelocity = Vector3.zero;
                 released = true;
+                
+                Destroy(dart.gameObject, dartLifetime);
+                currentDart = null;
             }
 
             var open = relativeTime <= 0f ? 0f : Mathf.Clamp01(relativeTime / fingerOpenDuration);
@@ -127,7 +193,7 @@ public class DartThrowDemo : MonoBehaviour
         }
 
         ghostHand.gameObject.SetActive(false);
-        Destroy(dart.gameObject, dartLifetime);
+        currentRoutine = null;  
     }
 
     /// <summary>
@@ -299,17 +365,6 @@ public class DartThrowDemo : MonoBehaviour
     }
 
     /// <summary>
-    /// World rotation for a Dart so it faces the direction
-    /// </summary>
-    /// <param name="direction">The direction the dart needs to face</param>
-    /// <returns>The world rotation</returns>
-    // private Quaternion DartRotation(Vector3 direction)
-    // {
-    //     return Quaternion.AngleAxis(handRoll, direction.normalized) * Quaternion.LookRotation(direction) *
-    //            Quaternion.Euler(localDartRotationOffset);
-    // }
-
-    /// <summary>
     /// Places the dart at the pinch point based on the grip pose
     /// </summary>
     /// <param name="dart">The dart</param>
@@ -319,5 +374,40 @@ public class DartThrowDemo : MonoBehaviour
     {
         var pose = DartMath.Compose(pinch, localGrip);
         dart.transform.SetPositionAndRotation(pose.position, pose.rotation);
+    }
+    
+    /// <summary>
+    /// Waits until the participant's dart matches the ghost dart for a duration
+    /// </summary>
+    /// <param name="ghostDart">The dart transform</param>
+    private IEnumerator WaitForAlignment(Transform ghostDart)
+    {
+        var axis = dartTipOffset.normalized;
+        var alignedTime = 0f;
+        alignProgress = 0f;
+        ghostDart.TryGetComponent<DartTint>(out var tint);
+
+        while (alignedTime < alignHoldDuration)
+        {
+            var held = dartGrabber.HeldDart;
+            if (held != null)
+            {
+                var distance = Vector3.Distance(held.position, ghostDart.position);
+                var angle = Vector3.Angle(held.rotation * axis, ghostDart.rotation * axis);
+                var inside = distance <= positionTolerance && angle <= angleTolerance;
+                alignedTime = inside ? alignedTime + Time.deltaTime : 0f;
+            }
+            else
+            {
+                alignedTime = 0f;
+            }
+
+            alignProgress = Mathf.Clamp01(alignedTime / alignHoldDuration);
+            if (tint != null) tint.SetTint(alignProgress);
+            yield return null;
+        }
+
+        if (tint != null) tint.ClearTint();
+        alignProgress = 0f;
     }
 }
